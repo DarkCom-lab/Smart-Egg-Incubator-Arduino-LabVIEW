@@ -2,7 +2,7 @@
 
 An automated egg incubator system that monitors temperature and humidity, controls cooling, and communicates real-time data to a LabVIEW dashboard via serial communication. Built with an Arduino Uno, DHT11 sensor, servo‑driven ventilation window, fan, buzzer, and a potentiometer for manual setpoint adjustment. Optional **IoT upgrade** using the ENC28J60 Ethernet module is also outlined.
 
-![Incubator Simulation Screenshot](path_to_screenshot_image) <!-- replace with actual screenshot if available -->
+![Incubator Simulation Screenshot](future_enhancement.png) <!-- replace with actual screenshot if available -->
 
 ---
 
