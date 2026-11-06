@@ -12,6 +12,10 @@ The `mqtt-wokwi-web/` folder contains the companion Node.js web dashboard, Ardui
 
 See [`mqtt-wokwi-web/README.md`](mqtt-wokwi-web/README.md) for local setup instructions.
 
+### Demo video
+
+[Watch the incubator demonstration video](demo.mp4)
+
 ---
 
 ## 📋 Table of Contents
