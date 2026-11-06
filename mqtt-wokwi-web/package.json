@@ -1,0 +1,19 @@
+{
+  "name": "incubator-mqtt-server",
+  "version": "1.0.0",
+  "description": "MQTT Server for Egg Incubator",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.22.1",
+    "mqtt": "^4.3.8",
+    "socket.io": "^4.8.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+

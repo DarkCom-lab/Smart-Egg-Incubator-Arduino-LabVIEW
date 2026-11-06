@@ -1,0 +1,1252 @@
+Warning: truncated output (original token count: 14580)
+Total output lines: 1478
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>🥚 Egg Incubator Controller</title>
+    <style>
+        /* ALL YOUR ORIGINAL CSS STAYS EXACTLY THE SAME */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #4cc9f0;
+            --secondary: #4361ee;
+            --dark: #16213e;
+            --darker: #0f3460;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #FF9800;
+            --light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(76, 201, 240, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            color: var(--primary);
+            text-shadow: 0 2px 10px rgba(76, 201, 240, 0.3);
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        
+        .status-online {
+            background: var(--success);
+        }
+        
+        .status-offline {
+            background: var(--danger);
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .esp32-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid;
+        }
+        
+        .esp32-online {
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .esp32-offline {
+            border-color: #f44336;
+            color: #f44336;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.8) 0%, rgba(15, 52, 96, 0.8) 100%);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(76, 201, 240, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        .card-title {
+            font-size: 1.3em;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .sensor-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .sensor-value {
+            font-size: 2.5em;
+            font-weight: 800;
+            margin: 10px 0;
+            color: var(--primary);
+            text-shadow: 0 2px 5px rgba(76, 201, 240, 0.3);
+        }
+        
+        .sensor-unit {
+            color: #aaa;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .sensor-label {
+            color: #ccc;
+            margin-bottom: 5px;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .slider-container {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 10px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 10px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, var(--darker), var(--primary));
+            border-radius: 5px;
+            outline: none;
+            margin: 15px 0;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 25px;
+            height: 25px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--primary);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .mode-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 70px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #666;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background: var(--success);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(36px);
+        }
+        
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-on {
+            background: linear-gradient(135deg, var(--success) 0%, #2e7d32 100%);
+        }
+        
+        .btn-off {
+            background: linear-gradient(135deg, var(--danger) 0%, #c62828 100%);
+        }
+        
+        .btn-mode {
+            background: linear-gradient(135deg, var(--secondary) 0%, #3a0ca3 100%);
+        }
+        
+        .btn:active {
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .status-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .status-label {
+            color: #ccc;
+        }
+        
+        .status-value {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.info {
+            background: var(--secondary);
+        }
+        
+        .chart-container {
+            height: 200px;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .temp-indicator {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right, #4CAF50, #FF9800, #f44336);
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .temp-marker {
+            position: absolute;
+            top: -5px;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            border: 3px solid var(--primary);
+            transition: left 0.5s ease;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .badge-warning {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .badge-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .badge-info {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .sync-btn {
+            background: linear-gradient(135deg, #9c27b0 0%, #673ab7 100%);
+        }
+        
+        .force-sync-btn {
+            background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+        }
+        
+        .sync-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .topic-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: 600;
+            background: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+            border: 1px solid rgba(76, 201, 240, 0.3);
+        }
+        
+        .topic-heartbeat {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .topic-sensor {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+            border-color: rgba(33, 150, 243, 0.3);
+        }
+        
+        .topic-control {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9c27b0;
+            border-color: rgba(156, 39, 176, 0.3);
+        }
+        
+        .topic-manual {
+            background: rgba(255, 152, 0, 0.2);
+            color: #FF9800;
+            border-color: rgba(255, 152, 0, 0.3);
+        }
+        
+        .topic-system {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border-color: rgba(244, 67, 54, 0.3);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .sensor-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>🥚 Egg Incubator Controller</h1>
+                <div class="connection-status" id="connectionStatus">
+                    <span>Connecting...</span>
+                    <div class="status-dot"></div>
+                </div>
+                <div class="esp32-status" id="esp32Status">
+                    <span>ESP32: --</span>
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+            <p style="margin-top: 10px; color: #aaa;">
+                Multi-Topic MQTT Communication | 
+                Last update: <span id="lastUpdateTime">--</span> | 
+                Messages: <span id="messageCounter">0</span>
+            </p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Sensor Readings Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📊 Sensor Readings</h2>
+                    <div>
+                        <span class="topic-badge topic-sensor">incubator/sensor_readings</span>
+                    </div>
+                </div>
+                <div class="sensor-grid">
+                    <div class="sensor-item">
+                        <div class="sensor-label">Temperature</div>
+                        <div class="sensor-value" id="tempValue">--</div>
+                        <div class="sensor-unit">°C</div>
+                        <div class="temp-indicator">
+                            <div class="temp-marker" id="tempMarker"></div>
+                        </div>
+                        <div style="font-size: 0.8em; color: #aaa;" id="tempStatus">Normal</div>
+                    </div>
+                    <div class="sensor-item">
+                        <div class="sensor-label">Humidity</div>
+                        <div class="sensor-value" id="humValue">--</div>
+                        <div class="sensor-unit">%</div>
+                        <div style="height: 20px; background: linear-gradient(to right, #e3f2fd, #bbdefb, #90caf9); border-radius: 10px; margin: 10px 0; position: relative;">
+                            <div class="temp-marker" id="humMarker"></div>
+                        </div>
+                        <div style="font-size: 0.8em; color: #aaa;" id="humStatus">Normal</div>
+                    </div>
+                    <div class="sensor-item">
+                        <div class="sensor-label">Potentiometer</div>
+                        <div class="sensor-value" id="potValue">--</div>
+                        <div class="sensor-unit">/4095</div>
+                        <div style="height: 20px; background: linear-gradient(to right, #1a237e, #283593, #3949ab); border-radius: 10px; margin: 10px 0; position: relative;">
+                            <div class="temp-marker" id="potMarker"></div>
+                        </div>
+                        <div style="font-size: 0.8em; color: #aaa;" id="potStatus">Auto Temp Control</div>
+                    </div>
+                    <div class="sensor-item">
+                        <div class="sensor-label">Servo Position</div>
+                        <div class="sensor-value" id="servoValue">--</div>
+                        <div class="sensor-unit">°</div>
+                        <div style="height: 20px; background: linear-gradient(to right, #004d40, #00695c, #00796b); border-radius: 10px; margin: 10px 0; position: relative;">
+                            <div class="temp-marker" id="servoMarker"></div>
+                        </div>
+                        <div style="font-size: 0.8em; color: #aaa;" id="servoStatus">Window</div>
+                    </div>
+                </div>
+                <div class="status-panel">
+                    <div class="status-item">
+                        <span class="status-label">Last Update:</span>
+                        <span class="status-value" id="sensorLastUpdate">--</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Data Age:</span>
+                        <span class="status-value" id="sensorDataAge">--</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Send Counter:</span>
+                        <span class="status-value" id="sensorSendCounter">--</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Setpoints Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🎯 Control Setpoints</h2>
+                    <div>
+                        <span class="topic-badge topic-control">incubator/control_setpoints</span>
+                    </div>
+                </div>
+                
+                <div class="mode-switch">
+                    <span>Control Mode:</span>
+                    <label class="switch">
+                        <input type="checkbox" id="modeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                    <span id="modeDisplay">AUTO</span>
+                </div>
+                
+                <div class="control-group">
+                    <label>Max Temperature: <span id="maxTempValue">30</span>°C</label>
+                    <div class="slider-container">
+                        <input type="range" min="25" max="40" value="30" id="tempSlider">
+                        <div class="value-display">
+                            <span>25°C</span>
+                            <span>40°C</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 0.9em;">
+                            <span id="tempSliderStatus">Click to send update</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Max Humidity: <span id="maxHumValue">80</span>%</label>
+                    <div class="slider-container">
+                        <input type="range" min="40" max="95" value="80" id="humSlider">
+                        <div class="value-display">
+                            <span>40%</span>
+                            <span>95%</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px; font-size: 0.9em;">
+                            <span id="humSliderStatus">Click to send update</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="status-panel">
+                    <div class="status-item">
+                        <span class="status-label">Current Mode:</span>
+                        <span class="status-value" id="currentMode">AUTO</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Set Temp:</span>
+                        <span class="status-value" id="displayTemp">30°C</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Set Hum:</span>
+                        <span class="status-value" id="displayHum">80%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Manual Controls Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🎮 Manual Controls</h2>
+                    <div>
+                        <span class="topic-badge topic-manual">incubator/manual_controls</span>
+                    </div>
+                </div>
+                
+                <div class="btn-grid">
+                    <button class="btn btn-on" onclick="controlDevice('FAN_ON')" id="fanBtn">
+                        <span>FAN</span>
+                        <span>ON</span>
+                    </button>
+                    <button class="btn btn-off" onclick="controlDevice('FAN_OFF')">
+                        <span>FAN</span>
+                        <span>OFF</span>
+                    </button>
+                    
+                    <button class="btn btn-on" onclick="controlDevice('WINDOW_OPEN')" id="windowOpenBtn">
+                        <span>WINDOW</span>
+                        <span>OPEN</span>
+                    </button>
+                    <button class="btn btn-off" onclick="controlDevice('WINDOW_CLOSE')" id="windowCloseBtn">
+                        <span>WINDOW</span>
+                        <span>CLOSE</span>
+                    </button>
+                    
+                    <button class="btn btn-on" onclick="controlDevice('LED_ON')" id="ledOnBtn">
+                        <span>LED</span>
+                        <span>ON</span>
+                    </button>
+                    <button class="btn btn-off" onclick="controlDevice('LED_OFF')" id="ledOffBtn">
+                        <span>LED</span>
+                        <span>OFF</span>
+                    </button>
+                    
+                    <button class="btn btn-on" onclick="controlDevice('BUZZER_ON')" id="buzzerOnBtn">
+                        <span>BUZZER</span>
+                        <span>ON</span>
+                    </button>
+                    <button class="btn bt…2580 tokens truncated…f (data.potentiometer !== undefined) {
+                document.getElementById('potValue').textContent = data.potentiometer;
+                currentData.potentiometer = data.potentiometer;
+                updatePotentiometerMarker(data.potentiometer);
+                updatePotentiometerStatus();
+            }
+            
+            if (data.servoPosition !== undefined) {
+                console.log('⚙️ Updating servo position to:', data.servoPosition);
+                
+                // Store the servo position
+                currentData.servoPosition = data.servoPosition;
+                
+                // Update servo marker visualization
+                updateServoMarker(data.servoPosition);
+                
+                // Update servo status text
+                updateServoStatus(data.servoPosition);
+                
+                // FIX: Update both systemServo AND servoValue from the same data
+                updateServoPositionDisplay(data.servoPosition);
+                
+                // Update window status based on servo position
+                updateWindowStatusFromServo(data.servoPosition);
+            }
+            
+            // Update chart with new data
+            updateChart(data.temperature || currentData.temperature, data.humidity || currentData.humidity);
+            
+            // Update last update time
+            const now = new Date();
+            document.getElementById('sensorLastUpdate').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            document.getElementById('lastUpdateTime').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        }
+        
+        // Helper function to update servo position in BOTH places
+        function updateServoPositionDisplay(servoPosition) {
+            // Update system status card
+            document.getElementById('systemServo').textContent = servoPosition + '°';
+            
+            // Update sensor readings card (linked to systemServo)
+            document.getElementById('servoValue').textContent = servoPosition;
+            
+            console.log('🔗 Linked servo update - System:', servoPosition + '°, Sensor:', servoPosition);
+        }
+        
+        // Helper function to update window status based on servo position
+        function updateWindowStatusFromServo(servoPosition) {
+            if (servoPosition >= 80) {
+                document.getElementById('systemWindow').textContent = 'OPEN';
+                document.getElementById('systemWindow').style.color = '#4CAF50';
+                currentData.windowOpen = true;
+            } else {
+                document.getElementById('systemWindow').textContent = 'CLOSED';
+                document.getElementById('systemWindow').style.color = '#f44336';
+                currentData.windowOpen = false;
+            }
+        }
+        
+        // Update control setpoints
+        function updateControlSetpoints(data) {
+            if (data.maxTemperature !== undefined) {
+                document.getElementById('maxTempValue').textContent = data.maxTemperature;
+                document.getElementById('tempSlider').value = data.maxTemperature;
+                document.getElementById('displayTemp').textContent = data.maxTemperature + '°C';
+                currentData.maxTemperature = data.maxTemperature;
+                updateTemperatureStatus();
+            }
+            
+            if (data.maxHumidity !== undefined) {
+                document.getElementById('maxHumValue').textContent = data.maxHumidity;
+                document.getElementById('humSlider').value = data.maxHumidity;
+                document.getElementById('displayHum').textContent = data.maxHumidity + '%';
+                currentData.maxHumidity = data.maxHumidity;
+                updateHumidityStatus();
+            }
+            
+            if (data.mode !== undefined) {
+                document.getElementById('modeDisplay').textContent = data.mode;
+                document.getElementById('currentMode').textContent = data.mode;
+                currentData.mode = data.mode;
+                
+                // Update mode switch
+                const modeSwitch = document.getElementById('modeSwitch');
+                modeSwitch.checked = (data.mode === 'MANUAL');
+                
+                // Update manual controls availability
+                updateManualControlsAvailability(data.mode === 'MANUAL');
+                
+                // Update potentiometer status based on mode
+                updatePotentiometerStatus();
+            }
+        }
+        
+        // Update manual controls - FIXED: Now also updates servo position
+        function updateManualControls(data) {
+            if (data.fanRunning !== undefined) {
+                document.getElementById('systemFan').textContent = data.fanRunning ? 'ON' : 'OFF';
+                document.getElementById('systemFan').style.color = data.fanRunning ? '#4CAF50' : '#f44336';
+                currentData.fanRunning = data.fanRunning;
+            }
+            
+            if (data.windowOpen !== undefined) {
+                document.getElementById('systemWindow').textContent = data.windowOpen ? 'OPEN' : 'CLOSED';
+                document.getElementById('systemWindow').style.color = data.windowOpen ? '#4CAF50' : '#f44336';
+                currentData.windowOpen = data.windowOpen;
+                
+                // FIX: When window status updates, also update servo position
+                // Window open = 90°, Window closed = 0°
+                const servoPos = data.windowOpen ? 90 : 0;
+                updateServoPositionDisplay(servoPos);
+                updateServoMarker(servoPos);
+                updateServoStatus(servoPos);
+                currentData.servoPosition = servoPos;
+            }
+            
+            if (data.ledStatus !== undefined) {
+                document.getElementById('systemLED').textContent = data.ledStatus ? 'ON' : 'OFF';
+                document.getElementById('systemLED').style.color = data.ledStatus ? '#4CAF50' : '#f44336';
+                currentData.ledStatus = data.ledStatus;
+            }
+            
+            if (data.buzzerStatus !== undefined) {
+                document.getElementById('systemBuzzer').textContent = data.buzzerStatus ? 'ON' : 'OFF';
+                document.getElementById('systemBuzzer').style.color = data.buzzerStatus ? '#4CAF50' : '#f44336';
+                currentData.buzzerStatus = data.buzzerStatus;
+            }
+        }
+        
+        // Update system status - FIXED: Now updates servoValue when systemServo is updated
+        function updateSystemStatus(data) {
+            if (data.sensorStatus !== undefined) {
+                document.getElementById('sensorHealth').textContent = data.sensorStatus ? 'OK' : 'ERROR';
+                document.getElementById('sensorHealth').style.color = data.sensorStatus ? '#4CAF50' : '#f44336';
+                currentData.sensorStatus = data.sensorStatus;
+            }
+            
+            if (data.wifi_rssi !== undefined) {
+                document.getElementById('wifiRSSI').textContent = data.wifi_rssi + ' dBm';
+                const rssi = data.wifi_rssi || -70;
+                document.getElementById('wifiRSSI').style.color = rssi > -70 ? '#4CAF50' : rssi > -80 ? '#FF9800' : '#f44336';
+                currentData.wifi_rssi = data.wifi_rssi;
+            }
+            
+            if (data.free_memory !== undefined) {
+                document.getElementById('freeMemory').textContent = data.free_memory + ' bytes';
+                currentData.free_memory = data.free_memory;
+            }
+            
+            if (data.client_id !== undefined) {
+                document.getElementById('esp32ClientId').textContent = data.client_id;
+                currentData.client_id = data.client_id;
+            }
+        }
+        
+        // Update heartbeat
+        function updateHeartbeat(data) {
+            lastHeartbeatTime = Date.now();
+            esp32Connected = true;
+            updateESP32Status(true);
+            
+            if (data.client_id) {
+                document.getElementById('esp32ClientId').textContent = data.client_id;
+            }
+            
+            updateHeartbeatDisplay();
+        }
+        
+        // Update entire dashboard
+        function updateDashboard(data) {
+            currentData = { ...currentData, ...data };
+            
+            // Update all sections
+            updateSensorReadings(data);
+            updateControlSetpoints(data);
+            updateManualControls(data);
+            updateSystemStatus(data);
+            
+            // Update ESP32 connection status
+            if (data.esp32_connected !== undefined) {
+                esp32Connected = data.esp32_connected;
+                updateESP32Status(data.esp32_connected);
+            }
+        }
+        
+        // Update markers and status indicators
+        function updateTemperatureMarker(temp) {
+            const tempMarker = document.getElementById('tempMarker');
+            const tempPercent = ((temp || 25) - 25) / (40 - 25) * 100;
+            tempMarker.style.left = `${Math.min(Math.max(tempPercent, 0), 100)}%`;
+        }
+        
+        function updateHumidityMarker(hum) {
+            const humMarker = document.getElementById('humMarker');
+            const humPercent = ((hum || 40) - 40) / (95 - 40) * 100;
+            humMarker.style.left = `${Math.min(Math.max(humPercent, 0), 100)}%`;
+        }
+        
+        function updatePotentiometerMarker(pot) {
+            const potMarker = document.getElementById('potMarker');
+            const potPercent = (pot || 0) / 4095 * 100;
+            potMarker.style.left = `${Math.min(Math.max(potPercent, 0), 100)}%`;
+        }
+        
+        function updateServoMarker(servo) {
+            const servoMarker = document.getElementById('servoMarker');
+            const servoPercent = (servo || 0) / 180 * 100;
+            servoMarker.style.left = `${Math.min(Math.max(servoPercent, 0), 100)}%`;
+        }
+        
+        function updateTemperatureStatus() {
+            const tempStatus = document.getElementById('tempStatus');
+            if (currentData.temperature >= currentData.maxTemperature) {
+                tempStatus.textContent = 'HIGH ⚠️';
+                tempStatus.style.color = '#f44336';
+            } else if (currentData.temperature <= (currentData.maxTemperature - 3)) {
+                tempStatus.textContent = 'LOW ⚠️';
+                tempStatus.style.color = '#FF9800';
+            } else {
+                tempStatus.textContent = 'Normal';
+                tempStatus.style.color = '#4CAF50';
+            }
+        }
+        
+        function updateHumidityStatus() {
+            const humStatus = document.getElementById('humStatus');
+            if (currentData.humidity >= currentData.maxHumidity) {
+                humStatus.textContent = 'HIGH ⚠️';
+                humStatus.style.color = '#f44336';
+            } else if (currentData.humidity <= (currentData.maxHumidity - 10)) {
+                humStatus.textContent = 'LOW ⚠️';
+                humStatus.style.color = '#FF9800';
+            } else {
+                humStatus.textContent = 'Normal';
+                humStatus.style.color = '#4CAF50';
+            }
+        }
+        
+        function updatePotentiometerStatus() {
+            const potStatus = document.getElementById('potStatus');
+            if (currentData.mode === 'AUTO') {
+                const potTemp = Math.round((currentData.potentiometer || 0) / 4095 * 15 + 25);
+                potStatus.textContent = `Sets temp to ${potTemp}°C`;
+                potStatus.style.color = '#4cc9f0';
+            } else {
+                potStatus.textContent = 'Manual Mode Active';
+                potStatus.style.color = '#aaa';
+            }
+        }
+        
+        function updateServoStatus(servoPosition) {
+            const servoStatus = document.getElementById('servoStatus');
+            if (servoPosition >= 80) {
+                servoStatus.textContent = 'WINDOW OPEN';
+                servoStatus.style.color = '#4CAF50';
+            } else if (servoPosition <= 10) {
+                servoStatus.textContent = 'WINDOW CLOSED';
+                servoStatus.style.color = '#f44336';
+            } else {
+                servoStatus.textContent = 'WINDOW PARTIAL';
+                servoStatus.style.color = '#FF9800';
+            }
+        }
+        
+        function updateManualControlsAvailability(isManualMode) {
+            const manualControls = document.querySelectorAll('.btn-grid .btn');
+            manualControls.forEach(btn => {
+                btn.disabled = !isManualMode;
+            });
+        }
+        
+        // Update chart
+        function updateChart(temp, hum) {
+            tempHistory.push(temp);
+            humHistory.push(hum);
+            
+            if (tempHistory.length > 10) tempHistory.shift();
+            if (humHistory.length > 10) humHistory.shift();
+            
+            const tempBar = document.getElementById('tempBar');
+            const humBar = document.getElementById('humBar');
+            
+            const tempHeight = ((temp - 25) / (40 - 25)) * 100;
+            const humHeight = ((hum - 40) / (95 - 40)) * 100;
+            
+            tempBar.style.height = `${Math.min(Math.max(tempHeight, 10), 100)}px`;
+            humBar.style.height = `${Math.min(Math.max(humHeight, 10), 100)}px`;
+        }
+        
+        // Update sensor data age
+        function updateSensorDataAge() {
+            if (sensorUpdateTime > 0) {
+                const age = Date.now() - sensorUpdateTime;
+                const ageSeconds = Math.floor(age / 1000);
+                const ageElement = document.getElementById('sensorDataAge');
+                
+                ageElement.textContent = ageSeconds + 's ago';
+                ageElement.style.color = ageSeconds > 5 ? '#FF9800' : '#4CAF50';
+            }
+        }
+        
+        // Update heartbeat display
+        function updateHeartbeatDisplay() {
+            if (lastHeartbeatTime > 0) {
+                const now = Date.now();
+                const age = now - lastHeartbeatTime;
+                const ageSeconds = Math.floor(age / 1000);
+                const heartbeatElement = document.getElementById('lastHeartbeat');
+                
+                heartbeatElement.textContent = ageSeconds + 's ago';
+                heartbeatElement.style.color = ageSeconds > 10 ? '#f44336' : ageSeconds > 5 ? '#FF9800' : '#4CAF50';
+            }
+        }
+        
+        // Control devices
+        function controlDevice(command) {
+            if (!socket || !socket.connected) {
+                showNotification('Not connected to server', 'error');
+                return;
+            }
+            
+            const isAutoMode = currentData.mode === 'AUTO';
+            if (isAutoMode && !command.includes('SET_MODE')) {
+                showNotification('Cannot control devices in AUTO mode', 'error');
+                return;
+            }
+            
+            // Send command to server
+            socket.emit('control-command', { command: command });
+            
+            // Show immediate feedback for window commands
+            if (command === 'WINDOW_OPEN') {
+                showNotification('Opening window...', 'info');
+                
+                // Immediate UI update for better user experience
+                updateServoPositionDisplay(90);
+                updateServoMarker(90);
+                updateServoStatus(90);
+                updateWindowStatusFromServo(90);
+            } else if (command === 'WINDOW_CLOSE') {
+                showNotification('Closing window...', 'info');
+                
+                // Immediate UI update for better user experience
+                updateServoPositionDisplay(0);
+                updateServoMarker(0);
+                updateServoStatus(0);
+                updateWindowStatusFromServo(0);
+            }
+        }
+        
+        // Request all data from ESP32
+        function requestAllData() {
+            if (!socket || !socket.connected) {
+                showNotification('Not connected to server', 'error');
+                return;
+            }
+            
+            socket.emit('request-all-data');
+            showNotification('Requesting all data from ESP32...', 'info');
+        }
+        
+        // Force sync
+        function forceSync() {
+            if (!socket || !socket.connected) {
+                showNotification('Not connected to server', 'error');
+                return;
+            }
+            
+            socket.emit('force-sync');
+            showNotification('Forcing sync with ESP32...', 'info');
+        }
+        
+        // Get server status
+        function getServerStatus() {
+            if (!socket || !socket.connected) {
+                showNotification('Not connected to server', 'error');
+                return;
+            }
+            
+            socket.emit('get-status');
+            showNotification('Requesting server status...', 'info');
+        }
+        
+        // Set mode
+        document.getElementById('modeSwitch').addEventListener('change', function() {
+            const mode = this.checked ? 'MANUAL' : 'AUTO';
+            
+            // Update UI immediately
+            currentData.mode = mode;
+            document.getElementById('modeDisplay').textContent = mode;
+            document.getElementById('currentMode').textContent = mode;
+            
+            // Update manual controls availability
+            updateManualControlsAvailability(mode === 'MANUAL');
+            
+            // Update potentiometer status
+            updatePotentiometerStatus();
+            
+            // Send command to ESP32
+            socket.emit('control-command', { 
+                command: 'SET_MODE',
+                mode: mode
+            });
+            
+            showNotification(`Switching to ${mode} mode...`, 'info');
+        });
+        
+        // Update temperature setpoint
+        const tempSlider = document.getElementById('tempSlider');
+        const tempSliderStatus = document.getElementById('tempSliderStatus');
+        
+        tempSlider.addEventListener('input', function() {
+            document.getElementById('displayTemp').textContent = this.value + '°C';
+            tempSliderStatus.textContent = 'Release to send update';
+            tempSliderStatus.style.color = '#FF9800';
+        });
+        
+        tempSlider.addEventListener('change', function() {
+            socket.emit('control-command', {
+                command: 'SET_TEMP',
+                value: parseInt(this.value)
+            });
+            tempSliderStatus.textContent = 'Update sent ✓';
+            tempSliderStatus.style.color = '#4CAF50';
+            
+            setTimeout(() => {
+                tempSliderStatus.textContent = 'Click to send update';
+                tempSliderStatus.style.color = '#aaa';
+            }, 2000);
+        });
+        
+        // Update humidity setpoint
+        const humSlider = document.getElementById('humSlider');
+        const humSliderStatus = document.getElementById('humSliderStatus');
+        
+        humSlider.addEventListener('input', function() {
+            document.getElementById('displayHum').textContent = this.value + '%';
+            humSliderStatus.textContent = 'Release to send update';
+            humSliderStatus.style.color = '#FF9800';
+        });
+        
+        humSlider.addEventListener('change', function() {
+            socket.emit('control-command', {
+                command: 'SET_HUM',
+                value: parseInt(this.value)
+            });
+            humSliderStatus.textContent = 'Update sent ✓';
+            humSliderStatus.style.color = '#4CAF50';
+            
+            setTimeout(() => {
+                humSliderStatus.textContent = 'Click to send update';
+                humSliderStatus.style.color = '#aaa';
+            }, 2000);
+        });
+        
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            const status = document.getElementById('connectionStatus');
+            const mqttStatus = document.getElementById('mqttStatus');
+            
+            if (connected) {
+                status.innerHTML = '<span>Connected</span><div class="status-dot" style="background: #4CAF50;"></div>';
+                status.className = 'connection-status status-online';
+                mqttStatus.textContent = 'ONLINE';
+                mqttStatus.style.color = '#4CAF50';
+            } else {
+                status.innerHTML = '<span>Disconnected</span><div class="status-dot" style="background: #f44336;"></div>';
+                status.className = 'connection-status status-offline';
+                mqttStatus.textContent = 'OFFLINE';
+                mqttStatus.style.color = '#f44336';
+            }
+        }
+        
+        // Update ESP32 status
+        function updateESP32Status(connected) {
+            esp32Connected = connected;
+            const esp32StatusElement = document.getElementById('esp32Status');
+            const statusDot = esp32StatusElement.querySelector('.status-dot');
+            const statusText = esp32StatusElement.querySelector('span');
+            
+            if (connected) {
+                esp32StatusElement.className = 'esp32-status esp32-online';
+                statusDot.style.background = '#4CAF50';
+                statusText.textContent = 'ESP32: ONLINE';
+            } else {
+                esp32StatusElement.className = 'esp32-status esp32-offline';
+                statusDot.style.background = '#f44336';
+                statusText.textContent = 'ESP32: OFFLINE';
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            initSocket();
+            
+            // Initialize markers
+            updateTemperatureMarker(25);
+            updateHumidityMarker(60);
+            updatePotentiometerMarker(0);
+            updateServoMarker(0);
+            
+            // Update displays every second
+            setInterval(() => {
+                updateSensorDataAge();
+                updateHeartbeatDisplay();
+            }, 1000);
+            
+            // Auto-request data every 30 seconds if stale
+            setInterval(() => {
+                if (socket && socket.connected && esp32Connected) {
+                    const dataAge = Date.now() - sensorUpdateTime;
+                    if (dataAge > 30000) {
+                        console.log('Auto-refreshing stale data...');
+                        requestAllData();
+                    }
+                }
+            }, 10000);
+        });
+    </script>
+</body>
+</html>

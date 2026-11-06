@@ -6,6 +6,14 @@ An automated egg incubator system that monitors temperature and humidity, contro
 
 ---
 
+## MQTT + Wokwi web approach
+
+The `mqtt-wokwi-web/` folder contains the companion Node.js web dashboard, Arduino firmware, and project documents for the MQTT-oriented Wokwi approach.
+
+See [`mqtt-wokwi-web/README.md`](mqtt-wokwi-web/README.md) for local setup instructions.
+
+---
+
 ## 📋 Table of Contents
 - [Features](#-features)
 - [Components & Pinout](#-components--pinout)
@@ -161,4 +169,5 @@ The `future_enhancement.png` picture outlines an **IoT upgrade** using the **ENC
 The necessary library (`ENC28J60 Ethernet Module Library`) is already included in the `libraries/` folder for Proteus simulation.
 
 ---
+
 
