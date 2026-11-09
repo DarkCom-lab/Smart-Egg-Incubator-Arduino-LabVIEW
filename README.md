@@ -1,20 +1,25 @@
-# Smart-Egg-Incubator-Arduino-LabVIEW
+# Smart Egg Incubator – Arduino & LabVIEW
 
-An automated egg incubator system that monitors temperature and humidity, controls cooling, and communicates real-time data to a LabVIEW dashboard via serial communication. Built with an Arduino Uno, DHT11 sensor, servo‑driven ventilation window, fan, buzzer, and a potentiometer for manual setpoint adjustment. Optional **IoT upgrade** using the ENC28J60 Ethernet module is also outlined.
+An automated egg incubator system that monitors temperature and humidity, controls cooling, and communicates real-time data to a LabVIEW dashboard through serial communication.
 
-![Incubator Simulation Screenshot](future_enhancement.png) <!-- replace with actual screenshot if available -->
+Built using an **Arduino Uno**, **DHT11 sensor**, **servo-controlled ventilation window**, **cooling fan**, **buzzer**, and a **potentiometer** for manual setpoint adjustment.
+
+An optional **IoT upgrade** using the ENC28J60 Ethernet module is also included in the project documentation.
+
+![Incubator Simulation Screenshot](future_enhancement.png)
 
 ---
 
 ## 📋 Table of Contents
+
 - [Features](#-features)
-- [Components & Pinout](#-components--pinout)
+- [Components and Pinout](#-components-and-pinout)
 - [How It Works](#-how-it-works)
 - [Control Logic](#-control-logic)
 - [LabVIEW Communication](#-labview-communication)
 - [Commands Reference](#-commands-reference)
-- [File Structure](#-file-structure)
-- [Installation & Setup](#-installation--setup)
+- [Project Structure](#-project-structure)
+- [Installation and Setup](#-installation-and-setup)
 - [Future Enhancements](#-future-enhancements)
 - [License](#-license)
 
@@ -22,143 +27,241 @@ An automated egg incubator system that monitors temperature and humidity, contro
 
 ## ✨ Features
 
-- **Temperature & humidity monitoring** with DHT11 sensor.
-- **Automatic cooling** when either temperature or humidity exceeds maximum thresholds.
-- **Servo‑controlled ventilation window** that opens/closes with the fan.
-- **Potentiometer** for on‑the‑fly adjustment of the maximum temperature (25 – 40 °C).
-- **Remote control & live data** via LabVIEW (or any serial terminal).
-- **Manual fan override** and automatic fallback after 10 seconds of inactivity.
-- **Audible alert** (buzzer) when humidity crosses the upper limit.
-- **Visual alert** (LED) when temperature is at or above maximum.
-- **Simulation support** for Proteus (using COMPIM to interface with LabVIEW).
-- **Modular code**, ready for extension with Ethernet / IoT.
+- **Temperature and humidity monitoring** using a DHT11 sensor.
+- **Automatic cooling** when temperature or humidity exceeds configured thresholds.
+- **Servo-controlled ventilation window** that opens and closes with the fan.
+- **Adjustable temperature setpoint** using a potentiometer (25–40 °C).
+- **Remote monitoring and control** through LabVIEW or any serial terminal.
+- **Manual fan override** with automatic mode restoration after 10 seconds of inactivity.
+- **Audible alert** using a buzzer when humidity exceeds its upper threshold.
+- **Visual alert** using an LED when temperature reaches or exceeds its maximum threshold.
+- **Proteus simulation support** using COMPIM for serial communication with LabVIEW.
+- **Modular architecture** ready for future Ethernet and IoT integration.
 
 ---
 
-## 🧱 Components & Pinout
+## 🧱 Components and Pinout
 
-| Component          | Arduino Pin | Notes |
-|--------------------|-------------|-------|
-| DHT11 sensor       | D7          | Temperature & humidity |
-| Potentiometer      | A0          | Sets max temperature (25–40 °C) |
-| Overheat LED       | D3          | Lights when temp ≥ max |
-| Servo motor        | D4          | Window actuator (0° closed, 90° open) |
-| Fan relay / MOSFET | D5          | Cooling fan control (use a relay for high-power fans) |
-| Buzzer             | D6          | Sounds when humidity is too high |
-| Power              | 5 V & GND    | LiPo battery / USB supply |
+| Component | Arduino Pin | Description |
+|:---|:---:|:---|
+| DHT11 Sensor | D7 | Temperature and humidity monitoring |
+| Potentiometer | A0 | Adjusts maximum temperature (25–40 °C) |
+| Overheat LED | D3 | Turns on when temperature ≥ maximum |
+| Servo Motor | D4 | Controls ventilation window (0° closed, 90° open) |
+| Fan Relay / MOSFET | D5 | Controls the cooling fan |
+| Buzzer | D6 | Alerts when humidity is too high |
+| Power Supply | 5V / GND | Arduino and sensor power |
 
-> **Note:** The code directly drives the fan from pin D5. If you are using a 12 V fan or a heater, add a relay module or a transistor circuit. The relay mentioned in the project can be used here.
+> **Hardware safety note:** Do not connect a high-power 12V fan directly to an Arduino output pin. Use an appropriately rated relay module or MOSFET driver circuit, with a suitable external power supply.
 
 ---
 
 ## ⚙️ How It Works
 
-1. The system reads temperature and humidity every 100 ms.
-2. If the **temperature** reaches or exceeds `maxTemperature`, the LED turns on.
-3. If the **humidity** reaches or exceeds `maxHumidity`, the buzzer beeps.
-4. When either condition is true, the **fan** and **window** are activated automatically to cool and vent.
-5. A **hysteresis** band (3 °C for temp, 5 % for humidity) prevents rapid toggling.
-6. Every 2 seconds, the Arduino sends a formatted data packet to LabVIEW:
-7. LabVIEW can send back commands to change setpoints or toggle the fan manually.
+1. The Arduino reads temperature and humidity from the DHT11 sensor.
+2. The temperature is compared with the configured maximum temperature.
+3. The humidity is compared with the configured maximum humidity.
+4. The LED turns on when the temperature reaches or exceeds its maximum threshold.
+5. The buzzer sounds when humidity reaches or exceeds its maximum threshold.
+6. If either cooling condition is triggered, the ventilation window opens and the fan starts.
+7. A hysteresis mechanism prevents rapid switching:
+   - Temperature hysteresis: **3 °C**
+   - Humidity hysteresis: **5%**
+8. Every 2 seconds, the Arduino transmits sensor readings and system status to LabVIEW.
+9. LabVIEW can send commands to modify thresholds or manually control the fan.
 
 ---
 
 ## 🌡️ Control Logic
 
-- **Temperature setpoint** comes either from the potentiometer or from a LabVIEW `T` command.
-- After a `T` command is received, it is used for **one** data case, then the system reverts to the potentiometer (unless `AUTO` is sent without arguments).
-- The fan and window behave as a pair:
-- **When cooling starts**: window opens → delay → fan ON.
-- **When cooling stops**: fan OFF → delay → window closes.
-- Manual fan control (`F` command) disables automatic cooling until an `AUTO` command or a 10‑second timeout.
+### Temperature Control
+
+- The maximum temperature can be configured through the potentiometer or a LabVIEW command.
+- The potentiometer provides a setpoint between 25 °C and 40 °C.
+- A temperature command (`T`) temporarily overrides the potentiometer setting for one data cycle.
+- Sending `AUTO` restores automatic temperature control using the potentiometer.
+
+### Fan and Ventilation Control
+
+The fan and ventilation window operate together:
+
+| Event | Sequence |
+|:---|:---|
+| Cooling starts | Window opens → Delay → Fan ON |
+| Cooling stops | Fan OFF → Delay → Window closes |
+
+### Manual Override
+
+- Sending the `F` command toggles manual fan control.
+- Manual control temporarily disables automatic cooling.
+- Automatic control resumes after an `AUTO` command or a 10-second inactivity timeout.
 
 ---
 
 ## 💻 LabVIEW Communication
 
-LabVIEW (or any serial monitor) connects to the Arduino via USB (hardware) or via COMPIM in Proteus simulation.
+The Arduino communicates with LabVIEW through a serial connection.
 
-**Serial parameters:** `9600 baud, 8N1`
+Supported configurations:
 
-### Data sent **to** LabVIEW (every 2 s):
-| Field         | Example | Meaning                     |
-|---------------|---------|-----------------------------|
-| case number   | case20  | Increments by 10 each time  |
-| temperature   | 31      | Current temp (°C, integer)  |
-| humidity      | 82      | Current humidity (%)        |
-| temp_status   | 1       | 1 = temp ≥ max, 0 = normal  |
-| fan_status    | 1       | 1 = fan on, 0 = off         |
+- USB serial communication (physical Arduino).
+- COMPIM virtual serial communication (Proteus simulation).
+- Any compatible serial terminal.
 
-### Commands **from** LabVIEW:
-| Command     | Description                                                | Example   |
-|-------------|------------------------------------------------------------|-----------|
-| `T 30`      | Set max temperature to 30 °C                               | `T 38`    |
-| `H 80`      | Set max humidity to 80 %                                   | `H 65`    |
-| `F`         | Toggle fan manually (overrides auto)                       | `F`       |
-| `AUTO`      | Return to automatic mode (use potentiometer)               | `AUTO`    |
-| `AUTOT 35`  | Return to auto and set temp to 35 °C (used for one cycle)  | `AUTOH 80T 32` |
+**Serial configuration:**
 
-All commands are **case‑insensitive** and can be combined with `AUTO` (e.g., `AUTOT 35H 70`).
+| Parameter | Value |
+|:---|:---|
+| Baud Rate | 9600 |
+| Data Bits | 8 |
+| Parity | None |
+| Stop Bits | 1 |
+
+### Data Sent to LabVIEW
+
+The Arduino sends a formatted data packet every 2 seconds.
+
+| Field | Example | Description |
+|:---|:---:|:---|
+| Case Number | `case20` | Increments by 10 each transmission |
+| Temperature | `31` | Current temperature (°C) |
+| Humidity | `82` | Current humidity (%) |
+| Temperature Status | `1` | `1` = threshold reached, `0` = normal |
+| Fan Status | `1` | `1` = fan ON, `0` = fan OFF |
+
+### Commands Reference
+
+The following commands can be sent from LabVIEW or a serial terminal.
+
+| Command | Description | Example |
+|:---|:---|:---|
+| `T 30` | Sets the maximum temperature to 30 °C | `T 38` |
+| `H 80` | Sets the maximum humidity to 80% | `H 65` |
+| `F` | Toggles manual fan control | `F` |
+| `AUTO` | Restores automatic mode using the potentiometer | `AUTO` |
+| `AUTOT 35` | Restores automatic mode and sets the temperature to 35 °C for one cycle | `AUTOT 35` |
+
+Commands are **case-insensitive** and can be combined.
+
+For example:
+
+```text
+AUTOT 35H 70
+```
+
+This combines automatic mode activation with temperature and humidity threshold configuration.
+
+> **Note:** The original command description also mentions `AUTOH 80T 32`. Check the Arduino command parser before relying on this exact syntax.
 
 ---
 
-## 📂 File Structure
-C:.
-│ readme.txt # Original brief description
-│ future_enhancement.png # Schematic / idea for IoT upgrade
-│ New Project [Autosaved].pdsprj # Proteus simulation file
-│ Untitled 1.vi # LabVIEW VI (untitled, but working)
-│ Enregistrement 2025-12-22 233754.mp4 # Demonstration video
-│
-├───final_project1 # Arduino sketch folder
-│ │ final_project1.ino # Main source code
-│ └───build # Compiled hex files
-│
-├───libraries # Custom libraries for Proteus
-│ ├───ENC28J60 Ethernet Module Library
-│ └───Fan Models Library
-│
-└───Project Backups # Older versions of the simulation
+## 📂 Project Structure
 
+The following structure represents the project files and directories.
+
+```text
+Smart-Egg-Incubator-Arduino-LabVIEW/
+│
+├── README.md
+├── future_enhancement.png
+│
+├── final_project1/
+│   ├── final_project1.ino
+│   │
+│   └── build/
+│       └── (Compiled HEX files)
+│
+├── libraries/
+│   ├── ENC28J60 Ethernet Module Library/
+│   └── Fan Models Library/
+│
+├── Project Backups/
+│   └── (Previous simulation versions)
+│
+├── New Project [Autosaved].pdsprj
+├── Untitled 1.vi
+│
+└── Enregistrement 2025-12-22 233754.mp4
+```
+
+### File Descriptions
+
+| File / Directory | Description |
+|:---|:---|
+| `README.md` | Project documentation |
+| `future_enhancement.png` | IoT upgrade illustration |
+| `final_project1/` | Main Arduino project |
+| `final_project1.ino` | Arduino source code |
+| `build/` | Compiled HEX files |
+| `libraries/` | Additional Proteus simulation libraries |
+| `Project Backups/` | Previous project versions |
+| `New Project [Autosaved].pdsprj` | Proteus simulation project |
+| `Untitled 1.vi` | LabVIEW interface |
+| `Enregistrement 2025-12-22 233754.mp4` | Project demonstration video |
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Installation and Setup
 
-### Hardware
-1. Wire the components as per the pinout table.
-2. Power the Arduino (USB or LiPo battery).
-3. Connect the USB cable to your PC for LabVIEW or serial monitor.
+### 1. Hardware Setup
 
-### Arduino IDE
-1. Install the **DHT sensor library** by Adafruit (via Library Manager).
-2. Install the **Servo** library (usually built‑in).
-3. Open `final_project1/final_project1.ino`.
-4. Select **Board: Arduino Uno** and upload.
+1. Connect the components according to the pinout table.
+2. Power the Arduino using USB or an appropriate external power supply.
+3. Connect the Arduino to your computer through USB.
+4. Ensure the fan driver circuit is correctly connected.
 
-### LabVIEW (optional)
-1. Open the `.vi` file (Untitled 1.vi) – or build your own panel.
-2. Configure the VISA serial port (COMx, 9600 baud).
-3. Read the incoming string and parse the `caseX: …` format.
-4. Send commands via VISA Write when buttons are pressed.
+### 2. Arduino IDE Setup
 
-### Proteus Simulation
-1. Open the `.pdsprj` file.
-2. The COMPIM component handles the virtual serial link to LabVIEW.
-3. Run the simulation and test the interaction.
+1. Install the Arduino IDE.
+2. Install the **DHT sensor library by Adafruit** through the Library Manager.
+3. Ensure the Arduino Servo library is available.
+4. Open the following file:
+
+   ```text
+   final_project1/final_project1.ino
+   ```
+
+5. Select:
+   - Board: Arduino Uno
+   - Correct COM port
+6. Compile and upload the sketch.
+
+### 3. LabVIEW Setup (Optional)
+
+1. Open `Untitled 1.vi`.
+2. Configure the VISA serial port.
+3. Set the baud rate to **9600**.
+4. Read and parse the incoming serial data.
+5. Use VISA Write to send commands to the Arduino.
+
+### 4. Proteus Simulation
+
+1. Open `New Project [Autosaved].pdsprj`.
+2. Verify the component connections.
+3. Configure COMPIM for virtual serial communication.
+4. Connect the virtual COM port to LabVIEW.
+5. Start the simulation and test the monitoring and control functions.
 
 ---
 
 ## 🔮 Future Enhancements
 
-The `future_enhancement.png` picture outlines an **IoT upgrade** using the **ENC28J60 Ethernet module**. This would allow:
+The `future_enhancement.png` illustration outlines a possible IoT upgrade using the **ENC28J60 Ethernet module**.
 
-- Remote monitoring via a web server or MQTT.
-- Data logging to a cloud platform (ThingSpeak, Blynk, etc.).
-- SMS/email alerts when thresholds are exceeded.
-- Integration into a smart farm system.
+Potential improvements include:
 
-The necessary library (`ENC28J60 Ethernet Module Library`) is already included in the `libraries/` folder for Proteus simulation.
+- **Remote Monitoring:** Access incubator temperature and humidity through a web interface.
+- **Cloud Data Logging:** Store sensor readings using platforms such as ThingSpeak or Blynk.
+- **Remote Alerts:** Send SMS or email notifications when thresholds are exceeded.
+- **MQTT Integration:** Enable communication with IoT platforms and smart-home systems.
+- **Smart Agriculture Integration:** Connect the incubator to a broader agricultural monitoring system.
+
+The project includes an ENC28J60 Ethernet module library for Proteus simulation.
 
 ---
 
+## 📄 License
+
+No license has been specified yet.
+
+If you intend to make this project open source, consider adding a `LICENSE` file and selecting an appropriate license, such as MIT.
